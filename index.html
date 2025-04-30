@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interaktivt Dashbord</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Egendefinert stil for å sikre at body og html tar full høyde */
+        html, body {
+            height: 100%;
+            margin: 0;
+            font-family: 'Calibri', sans-serif;
+        }
+        /* Sikrer at rot-containeren også tar full høyde og bruker flexbox */
+        #app-container {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        /* Sørger for at dashbord-visningen kan vokse og inneholde knappen nederst */
+        #dashboard-view {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column; /* Viktig for å plassere knappen nederst */
+        }
+         #tile-container {
+            width: 100%;
+            display: grid;
+            grid-template-columns: repeat(9, minmax(0, 1fr));
+            gap: 0.5rem;
+            padding: 1rem;
+            align-content: start;
+            /* Fjerner flex-grow herfra, lar dashboard-view styre veksten */
+         }
+
+        /* Stil for flisene */
+        .tile {
+            grid-column: span 3;
+            aspect-ratio: 3 / 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #1f2937; /* Tailwind gray-800 */
+            font-weight: bold;
+            text-align: center;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            padding: 0.5rem;
+            font-size: 0.875rem;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            word-break: break-word;
+        }
+        .tile-green {
+            background-color: #6ee7b7; /* Tailwind green-300 */
+        }
+        .tile-red {
+            background-color: #fca5a5; /* Tailwind red-300 */
+        }
+
+        /* CSS for å skjule elementer */
+        .hidden {
+            display: none;
+        }
+
+    </style>
+</head>
+<body class="bg-gray-100">
+
+    <div id="app-container">
+        <div id="menu-view" class="p-6 md:p-10 bg-white shadow-md rounded-lg m-4 md:m-8">
+            <h1 class="text-2xl font-bold mb-6 text-gray-800">Velg Kategorier</h1>
+             <button id="select-all-button" class="mb-4 w-full bg-indigo-500 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-lg transition duration-300 ease-in-out">
+                Velg alle / Fjern alle
+            </button>
+            <form id="category-form" class="space-y-4 max-h-96 overflow-y-auto pr-2">
+                </form>
+            <button id="submit-button" class="mt-6 w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition duration-300 ease-in-out">
+                Vis Dashbord
+            </button>
+             <button id="back-button" class="mt-4 w-full bg-gray-500 hover:bg-gray-700 text-white font-bold py-3 px-4 rounded-lg transition duration-300 ease-in-out hidden">
+                Tilbake til Meny
+            </button>
+        </div>
+
+        <div id="dashboard-view" class="hidden p-4 md:p-8 flex-grow">
+             <div class="flex justify-center items-center mb-6 px-1">
+                 <h1 id="dashboard-title" class="text-xl md:text-2xl font-bold text-gray-800 text-center">Oppfølgingsmøte</h1>
+             </div>
+             <div id="tile-container">
+                </div>
+             </div>
+    </div>
+
+    <script>
+        // Liste over kategorier
+        const categories = [
+            'Planlegge innløsninger',
+            'Skatt, inntekt, formue, utbytte',
+            'Langsiktig likviditetsstyring',
+            'Likviditetsfond',
+            'Oppdatert formuesplan',
+            'Legalt sikkerhetsnett',
+            'Pensjon',
+            'Regnskap',
+            'Henvisningsmodell',
+            'Indeks vs aktiv',
+            'Eksterne investeringer, oversikt',
+            'Sparing',
+            'Mobil App'
+        ];
+
+        // Henter referanser til HTML-elementer
+        const categoryForm = document.getElementById('category-form');
+        const submitButton = document.getElementById('submit-button');
+        const backButton = document.getElementById('back-button');
+        const selectAllButton = document.getElementById('select-all-button');
+        const menuView = document.getElementById('menu-view');
+        const dashboardView = document.getElementById('dashboard-view');
+        const tileContainer = document.getElementById('tile-container');
+        const dashboardTitle = document.getElementById('dashboard-title'); // Referanse til H1-tittel
+
+        let allSelected = false;
+
+        // Funksjon for å generere avkrysningsbokser for kategorier
+        function populateCategories() {
+            categoryForm.innerHTML = '';
+            categories.forEach((category, index) => {
+                const div = document.createElement('div');
+                div.classList.add('flex', 'items-center', 'bg-gray-50', 'p-3', 'rounded-md');
+
+                const input = document.createElement('input');
+                input.type = 'checkbox';
+                input.id = `category-${index}`;
+                input.name = 'category';
+                input.value = category;
+                input.classList.add('h-5', 'w-5', 'text-blue-600', 'border-gray-300', 'rounded', 'focus:ring-blue-500');
+
+                const label = document.createElement('label');
+                label.htmlFor = `category-${index}`;
+                label.textContent = category;
+                label.classList.add('ml-3', 'block', 'text-sm', 'font-medium', 'text-gray-700');
+
+                div.appendChild(input);
+                div.appendChild(label);
+                categoryForm.appendChild(div);
+            });
+        }
+
+        // Funksjon for å velge eller fjerne alle avkrysningsbokser
+        function toggleSelectAll() {
+            const checkboxes = categoryForm.querySelectorAll('input[type="checkbox"]');
+            allSelected = !allSelected;
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = allSelected;
+            });
+        }
+
+        // Funksjon for å bytte farge på en flis
+        function toggleTileColor(event) {
+            const tile = event.currentTarget;
+            if (tile.classList.contains('tile-green')) {
+                tile.classList.remove('tile-green');
+                tile.classList.add('tile-red');
+            } else {
+                tile.classList.remove('tile-red');
+                tile.classList.add('tile-green');
+            }
+        }
+
+        // Funksjon for å vise dashbordet med valgte fliser
+        function showDashboard() {
+            const selectedCheckboxes = document.querySelectorAll('#category-form input[name="category"]:checked');
+            const selectedCategories = Array.from(selectedCheckboxes).map(cb => cb.value);
+
+            // Oppdater tittel med dagens dato
+            const today = new Date();
+            const formattedDate = today.toLocaleDateString('no-NO'); // Format: dd.mm.åååå
+            dashboardTitle.textContent = `Oppfølgingsmøte ${formattedDate}`;
+
+            tileContainer.innerHTML = ''; // Tømmer fliser
+
+            if (selectedCategories.length > 0) {
+                selectedCategories.forEach(category => {
+                    const tile = document.createElement('div');
+                    tile.classList.add('tile', 'tile-green');
+                    tile.textContent = category;
+                    tile.addEventListener('click', toggleTileColor);
+                    tileContainer.appendChild(tile);
+                });
+            } else {
+                 const message = document.createElement('p');
+                 message.textContent = 'Ingen kategorier valgt. Gå tilbake og velg minst én.';
+                 message.classList.add('text-center', 'text-gray-500', 'col-span-9', 'py-10');
+                 tileContainer.appendChild(message);
+            }
+
+            // Skjuler menyen og viser dashbordet
+            menuView.classList.add('hidden');
+            dashboardView.classList.remove('hidden');
+            dashboardView.classList.add('flex'); // Viktig for flex-direction: column
+
+            // Flytter tilbake-knappen til bunnen av dashbord-visningen
+            dashboardView.appendChild(backButton); // Legger knappen til sist i dashboardView
+            backButton.classList.remove('hidden'); // Viser knappen
+            backButton.classList.remove('w-full', 'mt-4'); // Fjerner meny-spesifikk styling
+            // Legger til klasser for posisjonering nederst til høyre
+            backButton.classList.add('mt-auto', 'self-end', 'mr-4', 'mb-4', 'px-4', 'py-2'); // mt-auto pusher ned, self-end til høyre + margin + padding
+        }
+
+        // Funksjon for å vise menyen igjen
+        function showMenu() {
+            dashboardView.classList.add('hidden');
+            dashboardView.classList.remove('flex');
+            menuView.classList.remove('hidden');
+
+            // Flytter tilbake-knappen tilbake til meny-view og skjuler/styler den
+            menuView.appendChild(backButton); // Legger den til sist i menuView
+            backButton.classList.add('hidden'); // Skjuler knappen
+            backButton.classList.add('w-full', 'mt-4'); // Gir tilbake meny-styling
+            // Fjerner dashbord-spesifikk styling
+            backButton.classList.remove('mt-auto', 'self-end', 'mr-4', 'mb-4', 'px-4', 'py-2');
+        }
+
+
+        // Legger til lytter på "Vis Dashbord"-knappen
+        submitButton.addEventListener('click', (event) => {
+            event.preventDefault();
+            showDashboard();
+        });
+
+         // Legger til lytter på "Tilbake til Meny"-knappen
+         backButton.addEventListener('click', showMenu);
+
+         // Legger til lytter på "Velg alle / Fjern alle"-knappen
+         selectAllButton.addEventListener('click', toggleSelectAll);
+
+        // Kjører funksjonen for å lage kategori-listen når siden lastes
+        document.addEventListener('DOMContentLoaded', populateCategories);
+
+    </script>
+
+</body>
+</html>
