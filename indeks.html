@@ -10,59 +10,54 @@
         html, body {
             height: 100%;
             margin: 0;
-            /* Endret font til Calibri med fallback */
             font-family: 'Calibri', sans-serif;
         }
         /* Sikrer at rot-containeren også tar full høyde og bruker flexbox */
         #app-container {
             display: flex;
             flex-direction: column;
-            min-height: 100vh; /* Minimum høyde for å dekke viewport */
+            min-height: 100vh;
         }
-        /* Sørger for at flis-containeren kan vokse og fylle tilgjengelig plass */
+        /* Sørger for at dashbord-visningen kan vokse og inneholde knappen nederst */
         #dashboard-view {
             flex-grow: 1;
-            display: flex; /* Bruker flex for å håndtere layout */
-            flex-direction: column; /* Stabler elementene vertikalt */
-            /* align-items: stretch; Strekker barna for å fylle høyden */
+            display: flex;
+            flex-direction: column; /* Viktig for å plassere knappen nederst */
         }
          #tile-container {
-            width: 100%; /* Tar full bredde */
+            width: 100%;
             display: grid;
-            /* Endret til et 9-kolonners grid */
             grid-template-columns: repeat(9, minmax(0, 1fr));
-            gap: 0.5rem; /* Redusert mellomrom for tettere grid */
-            padding: 1rem; /* Padding rundt grid */
-            align-content: start; /* Alignerer rader til toppen */
-            flex-grow: 1; /* Lar gridet vokse for å fylle plassen */
+            gap: 0.5rem;
+            padding: 1rem;
+            align-content: start;
+            /* Fjerner flex-grow herfra, lar dashboard-view styre veksten */
          }
 
         /* Stil for flisene */
         .tile {
-            /* Får hver flis til å spenne over 3 kolonner */
             grid-column: span 3;
-            /* Setter et fast sideforhold for liggende format */
             aspect-ratio: 3 / 1;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: white;
+            color: #1f2937; /* Tailwind gray-800 */
             font-weight: bold;
             text-align: center;
-            border-radius: 0.5rem; /* Rounded corners */
+            border-radius: 0.5rem;
             cursor: pointer;
-            transition: background-color 0.3s ease; /* Myk overgang for fargeendring */
-            padding: 0.5rem; /* Justert padding for mindre fliser */
-            font-size: 0.875rem; /* Justert fontstørrelse om nødvendig */
-            overflow: hidden; /* Skjuler tekst som går utenfor */
-            text-overflow: ellipsis; /* Legger til ... for lang tekst */
-            word-break: break-word; /* Bryter lange ord om nødvendig */
+            transition: background-color 0.3s ease;
+            padding: 0.5rem;
+            font-size: 0.875rem;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            word-break: break-word;
         }
         .tile-green {
-            background-color: #4ade80; /* Tailwind green-400 */
+            background-color: #6ee7b7; /* Tailwind green-300 */
         }
         .tile-red {
-            background-color: #f87171; /* Tailwind red-400 */
+            background-color: #fca5a5; /* Tailwind red-300 */
         }
 
         /* CSS for å skjule elementer */
@@ -91,11 +86,12 @@
         </div>
 
         <div id="dashboard-view" class="hidden p-4 md:p-8 flex-grow">
-             <div class="flex justify-between items-center mb-6 px-1"> <img src="spwm.png" alt="Söderberg & Partners Logo" class="h-10 md:h-12" onerror="this.style.display='none'"> <h1 class="text-xl md:text-2xl font-bold text-gray-800 text-right">Oppfølgingsmøte - dashboard</h1>
+             <div class="flex justify-center items-center mb-6 px-1">
+                 <h1 id="dashboard-title" class="text-xl md:text-2xl font-bold text-gray-800 text-center">Oppfølgingsmøte</h1>
              </div>
              <div id="tile-container">
                 </div>
-        </div>
+             </div>
     </div>
 
     <script>
@@ -119,17 +115,18 @@
         // Henter referanser til HTML-elementer
         const categoryForm = document.getElementById('category-form');
         const submitButton = document.getElementById('submit-button');
-        const backButton = document.getElementById('back-button'); // Referanse til tilbake-knappen
-        const selectAllButton = document.getElementById('select-all-button'); // Referanse til velg-alle-knappen
+        const backButton = document.getElementById('back-button');
+        const selectAllButton = document.getElementById('select-all-button');
         const menuView = document.getElementById('menu-view');
         const dashboardView = document.getElementById('dashboard-view');
         const tileContainer = document.getElementById('tile-container');
+        const dashboardTitle = document.getElementById('dashboard-title'); // Referanse til H1-tittel
 
-        let allSelected = false; // Holder styr på om alle er valgt
+        let allSelected = false;
 
         // Funksjon for å generere avkrysningsbokser for kategorier
         function populateCategories() {
-            categoryForm.innerHTML = ''; // Tømmer forrige innhold
+            categoryForm.innerHTML = '';
             categories.forEach((category, index) => {
                 const div = document.createElement('div');
                 div.classList.add('flex', 'items-center', 'bg-gray-50', 'p-3', 'rounded-md');
@@ -155,7 +152,7 @@
         // Funksjon for å velge eller fjerne alle avkrysningsbokser
         function toggleSelectAll() {
             const checkboxes = categoryForm.querySelectorAll('input[type="checkbox"]');
-            allSelected = !allSelected; // Inverterer status
+            allSelected = !allSelected;
             checkboxes.forEach(checkbox => {
                 checkbox.checked = allSelected;
             });
@@ -163,7 +160,7 @@
 
         // Funksjon for å bytte farge på en flis
         function toggleTileColor(event) {
-            const tile = event.currentTarget; // Bruker currentTarget for å få flisen
+            const tile = event.currentTarget;
             if (tile.classList.contains('tile-green')) {
                 tile.classList.remove('tile-green');
                 tile.classList.add('tile-red');
@@ -178,7 +175,12 @@
             const selectedCheckboxes = document.querySelectorAll('#category-form input[name="category"]:checked');
             const selectedCategories = Array.from(selectedCheckboxes).map(cb => cb.value);
 
-            tileContainer.innerHTML = ''; // Tømmer forrige innhold
+            // Oppdater tittel med dagens dato
+            const today = new Date();
+            const formattedDate = today.toLocaleDateString('no-NO'); // Format: dd.mm.åååå
+            dashboardTitle.textContent = `Oppfølgingsmøte ${formattedDate}`;
+
+            tileContainer.innerHTML = ''; // Tømmer fliser
 
             if (selectedCategories.length > 0) {
                 selectedCategories.forEach(category => {
@@ -191,20 +193,21 @@
             } else {
                  const message = document.createElement('p');
                  message.textContent = 'Ingen kategorier valgt. Gå tilbake og velg minst én.';
-                 message.classList.add('text-center', 'text-gray-500', 'col-span-9', 'py-10'); // Spenner over alle kolonner
+                 message.classList.add('text-center', 'text-gray-500', 'col-span-9', 'py-10');
                  tileContainer.appendChild(message);
             }
 
             // Skjuler menyen og viser dashbordet
             menuView.classList.add('hidden');
             dashboardView.classList.remove('hidden');
-            dashboardView.classList.add('flex'); // Aktiver flex for layout
-            // Sørger for at tilbake-knappen vises i dashbord-visningen
-            // Flyttet tilbake-knappen til toppen av dashbord-visningen for bedre synlighet
-            dashboardView.insertBefore(backButton, dashboardView.firstChild); // Flytter knappen
+            dashboardView.classList.add('flex'); // Viktig for flex-direction: column
+
+            // Flytter tilbake-knappen til bunnen av dashbord-visningen
+            dashboardView.appendChild(backButton); // Legger knappen til sist i dashboardView
             backButton.classList.remove('hidden'); // Viser knappen
-            backButton.classList.remove('w-full'); // Fjerner full bredde
-            backButton.classList.add('mb-4', 'self-start'); // Legger til margin og justerer til venstre
+            backButton.classList.remove('w-full', 'mt-4'); // Fjerner meny-spesifikk styling
+            // Legger til klasser for posisjonering nederst til høyre
+            backButton.classList.add('mt-auto', 'self-end', 'mr-4', 'mb-4', 'px-4', 'py-2'); // mt-auto pusher ned, self-end til høyre + margin + padding
         }
 
         // Funksjon for å vise menyen igjen
@@ -212,17 +215,19 @@
             dashboardView.classList.add('hidden');
             dashboardView.classList.remove('flex');
             menuView.classList.remove('hidden');
-            // Flytter tilbake-knappen tilbake til meny-view og skjuler den
-            menuView.appendChild(backButton); // Flytter knappen tilbake
+
+            // Flytter tilbake-knappen tilbake til meny-view og skjuler/styler den
+            menuView.appendChild(backButton); // Legger den til sist i menuView
             backButton.classList.add('hidden'); // Skjuler knappen
-            backButton.classList.add('w-full'); // Gir tilbake full bredde for menyvisning
-            backButton.classList.remove('mb-4', 'self-start'); // Fjerner dashbord-spesifikk styling
+            backButton.classList.add('w-full', 'mt-4'); // Gir tilbake meny-styling
+            // Fjerner dashbord-spesifikk styling
+            backButton.classList.remove('mt-auto', 'self-end', 'mr-4', 'mb-4', 'px-4', 'py-2');
         }
 
 
         // Legger til lytter på "Vis Dashbord"-knappen
         submitButton.addEventListener('click', (event) => {
-            event.preventDefault(); // Forhindrer standard form-innsending
+            event.preventDefault();
             showDashboard();
         });
 
