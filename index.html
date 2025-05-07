@@ -9,119 +9,186 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700&display=swap" rel="stylesheet">
     <style>
-        /*
-         * VIKTIG: For å bruke 'Whitney Light', må du laste inn fontfilene.
-         * Dette gjøres vanligvis med @font-face. Eksempel (erstatt med dine faktiske filstier):
-         *
-         * @font-face {
-         * font-family: 'Whitney Light';
-         * src: url('/stier/til/dine/whitneylight.woff2') format('woff2'),
-         * url('/stier/til/dine/whitneylight.woff') format('woff');
-         * font-weight: 300; // Eller den vekten som tilsvarer 'Light'
-         * font-style: normal;
-         * }
-         *
-         * Sørg for at du har lisens til å bruke fonten på nett.
-        */
-
-        /* Egendefinert stil for å sikre at body og html tar full høyde */
         html, body {
             height: 100%;
             margin: 0;
-            /* Oppdatert font-family: Prøver Whitney Light først, deretter Inter, så standard sans-serif */
-            font-family: 'Whitney Light', 'Inter', sans-serif;
-            font-weight: 300; /* Setter en standard lett vekt, juster etter behov */
+            font-family: 'Inter', sans-serif;
+            font-weight: 300;
+            background: linear-gradient(135deg, #f0f4f8 0%, #d9e2ec 100%);
         }
-        /* Sikrer at rot-containeren også tar full høyde og bruker flexbox */
+
         #app-container {
             display: flex;
             flex-direction: column;
             min-height: 100vh;
         }
-        /* Sørger for at dashbord-visningen kan vokse og inneholde knappen nederst */
+
         #dashboard-view {
             flex-grow: 1;
             display: flex;
-            flex-direction: column; /* Viktig for å plassere knappen nederst */
+            flex-direction: column;
         }
-         #tile-container {
+
+        #tile-container {
             width: 100%;
             display: grid;
             grid-template-columns: repeat(9, minmax(0, 1fr));
-            gap: 0.5rem; /* Redusert gap for potensielt bredere font */
-            padding: 1rem;
+            gap: 1.25rem;
+            padding: 2rem;
             align-content: start;
-            /* Fjerner flex-grow herfra, lar dashboard-view styre veksten */
-         }
+        }
 
-        /* Stil for flisene */
         .tile {
             grid-column: span 3;
             aspect-ratio: 3 / 1;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: #1f2937; /* Tailwind gray-800 */
-            font-weight: normal; /* Justert fra bold til normal for en 'Light' font */
+            color: #fff;
+            font-weight: 400;
             text-align: center;
-            border-radius: 0.5rem;
+            border-radius: 1.2rem;
             cursor: pointer;
-            transition: background-color 0.3s ease;
-            padding: 0.5rem;
-            font-size: 0.875rem; /* Kan justeres basert på fontens utseende */
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            padding: 1.25rem;
+            font-size: 0.95rem;
             overflow: hidden;
             text-overflow: ellipsis;
-            /* Fjernet word-break: break-word; da det kan se rart ut med noen fonter */
-            white-space: normal; /* Tillater linjeskift om nødvendig */
-        }
-        .tile-green {
-            background-color: #6ee7b7; /* Tailwind green-300 */
-        }
-        .tile-red {
-            background-color: #fca5a5; /* Tailwind red-300 */
+            white-space: normal;
+            position: relative;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15), 0 4px 12px rgba(0, 0, 0, 0.1);
+            transform: translateY(0) rotateX(0deg) rotateY(0deg);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            background-clip: padding-box;
         }
 
-        /* CSS for å skjule elementer */
+        .tile:hover {
+            transform: translateY(-10px) rotateX(5deg) rotateY(5deg);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2), 0 6px 20px rgba(0, 0, 0, 0.15);
+            border-color: rgba(255, 255, 255, 0.4);
+        }
+
+        .tile:active {
+            transform: translateY(-2px) rotateX(2deg) rotateY(2deg);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15), 0 3px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .tile-green {
+            background: linear-gradient(45deg, #10b981, #6ee7b7);
+        }
+
+        .tile-red {
+            background: linear-gradient(45deg, #ef4444, #fca5a5);
+        }
+
+        .tile::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.3), transparent 70%);
+            opacity: 0.2;
+            transition: opacity 0.3s ease;
+        }
+
+        .tile:hover::before {
+            opacity: 0.4;
+        }
+
         .hidden {
             display: none;
         }
 
-        /* Justering for checkbox-label for bedre linjering */
         #category-form label {
-            line-height: 1.25rem; /* Matcher checkbox høyde */
+            line-height: 1.25rem;
         }
 
+        .menu-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 1.5rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .menu-card:hover {
+            transform: translateY(-3px);
+        }
+
+        .button-3d {
+            position: relative;
+            background: linear-gradient(45deg, #3b82f6, #60a5fa);
+            color: white;
+            border: none;
+            border-radius: 0.75rem;
+            padding: 0.75rem 1.5rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .button-3d:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+            background: linear-gradient(45deg, #2563eb, #3b82f6);
+        }
+
+        .button-3d:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .category-item {
+            background: linear-gradient(90deg, #f3f4f6, #e5e7eb);
+            border-radius: 0.75rem;
+            padding: 0.75rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .category-item:hover {
+            background: linear-gradient compromis(90deg, #e5e7eb, #d1d5db);
+            transform: translateX(5px);
+        }
+
+        .dashboard-title {
+            background: linear-gradient(to right, #1f2937, #4b5563);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
     </style>
 </head>
-<body class="bg-gray-100">
-
+<body>
     <div id="app-container">
-        <div id="menu-view" class="p-6 md:p-10 bg-white shadow-md rounded-lg m-4 md:m-8">
-            <h1 class="text-2xl font-bold mb-6 text-gray-800">Velg Kategorier</h1>
-             <button id="select-all-button" class="mb-4 w-full bg-indigo-500 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-lg transition duration-300 ease-in-out">
-                 Velg alle / Fjern alle
-             </button>
+        <div id="menu-view" class="p-6 md:p-10 m-4 md:m-8 menu-card">
+            <h1 class="text-2xl md:text-3xl font-bold mb-6 text-gray-800 dashboard-title">Velg Kategorier</h1>
+            <button id="select-all-button" class="mb-4 w-full button-3d">
+                Velg alle / Fjern alle
+            </button>
             <form id="category-form" class="space-y-4 max-h-96 overflow-y-auto pr-2">
-                </form>
-            <button id="submit-button" class="mt-6 w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition duration-300 ease-in-out">
+            </form>
+            <button id="submit-button" class="mt-6 w-full button-3d">
                 Vis Dashbord
             </button>
-             <button id="back-button" class="mt-4 w-full bg-gray-500 hover:bg-gray-700 text-white font-bold py-3 px-4 rounded-lg transition duration-300 ease-in-out hidden">
-                 Tilbake til Meny
-             </button>
+            <button id="back-button" class="mt-4 w-full button-3d hidden">
+                Tilbake til Meny
+            </button>
         </div>
 
         <div id="dashboard-view" class="hidden p-4 md:p-8 flex-grow">
-             <div class="flex justify-center items-center mb-6 px-1">
-                 <h1 id="dashboard-title" class="text-xl md:text-2xl font-bold text-gray-800 text-center">Oppfølgingsmøte</h1>
-             </div>
-             <div id="tile-container">
-                 </div>
-             </div>
+            <div class="flex justify-center items-center mb-6 px-1">
+                <h1 id="dashboard-title" class="text-xl md:text-2xl font-bold dashboard-title">Oppfølgingsmøte</h1>
+            </div>
+            <div id="tile-container">
+            </div>
+        </div>
     </div>
 
     <script>
-        // Liste over kategorier
         const categories = [
             'Planlegge innløsninger',
             'Skatt, inntekt',
@@ -141,11 +208,10 @@
             'Indeks vs aktiv',
             'Eksterne investeringer, oversikt',
             'Sparing',
-            'Mobil App', // Manglet komma her
+            'Mobil App',
             'Forsikring',
         ];
 
-        // Henter referanser til HTML-elementer
         const categoryForm = document.getElementById('category-form');
         const submitButton = document.getElementById('submit-button');
         const backButton = document.getElementById('back-button');
@@ -153,29 +219,27 @@
         const menuView = document.getElementById('menu-view');
         const dashboardView = document.getElementById('dashboard-view');
         const tileContainer = document.getElementById('tile-container');
-        const dashboardTitle = document.getElementById('dashboard-title'); // Referanse til H1-tittel
+        const dashboardTitle = document.getElementById('dashboard-title');
 
         let allSelected = false;
 
-        // Funksjon for å generere avkrysningsbokser for kategorier
         function populateCategories() {
-            categoryForm.innerHTML = ''; // Tømmer eksisterende innhold
+            categoryForm.innerHTML = '';
             categories.forEach((category, index) => {
                 const div = document.createElement('div');
-                div.classList.add('flex', 'items-center', 'bg-gray-50', 'p-3', 'rounded-md');
+                div.classList.add('flex', 'items-center', 'category-item');
 
                 const input = document.createElement('input');
                 input.type = 'checkbox';
                 input.id = `category-${index}`;
                 input.name = 'category';
                 input.value = category;
-                // Bruker Tailwind's ring-offset for bedre synlighet ved fokus
-                input.classList.add('h-5', 'w-5', 'text-blue-600', 'border-gray-300', 'rounded', 'focus:ring-2', 'focus:ring-blue-500', 'focus:ring-offset-1', 'focus:ring-offset-gray-50');
+                input.classList.add('h-5', 'w-5', 'text-blue-600', 'border-gray-300', 'rounded', 'focus:ring-2', 'focus:ring-blue-500', 'focus:ring-offset-1');
 
                 const label = document.createElement('label');
                 label.htmlFor = `category-${index}`;
                 label.textContent = category;
-                label.classList.add('ml-3', 'block', 'text-sm', 'font-medium', 'text-gray-700', 'select-none'); // select-none for å unngå tekstmarkering ved klikk
+                label.classList.add('ml-3', 'block', 'text-sm', 'font-medium', 'text-gray-700', 'select-none');
 
                 div.appendChild(input);
                 div.appendChild(label);
@@ -183,20 +247,16 @@
             });
         }
 
-        // Funksjon for å velge eller fjerne alle avkrysningsbokser
         function toggleSelectAll() {
             const checkboxes = categoryForm.querySelectorAll('input[type="checkbox"]');
-            allSelected = !allSelected; // Veksler status
+            allSelected = !allSelected;
             checkboxes.forEach(checkbox => {
                 checkbox.checked = allSelected;
             });
-            // Oppdater knappetekst (valgfritt)
-            // selectAllButton.textContent = allSelected ? 'Fjern alle' : 'Velg alle';
         }
 
-        // Funksjon for å bytte farge på en flis ved klikk
         function toggleTileColor(event) {
-            const tile = event.currentTarget; // Bruker currentTarget for å sikre at vi får div-elementet
+            const tile = event.currentTarget;
             if (tile.classList.contains('tile-green')) {
                 tile.classList.remove('tile-green');
                 tile.classList.add('tile-red');
@@ -206,80 +266,60 @@
             }
         }
 
-        // Funksjon for å vise dashbordet med valgte fliser
         function showDashboard() {
             const selectedCheckboxes = document.querySelectorAll('#category-form input[name="category"]:checked');
             const selectedCategories = Array.from(selectedCheckboxes).map(cb => cb.value);
 
-            // Oppdater tittel med dagens dato
             const today = new Date();
-            const formattedDate = today.toLocaleDateString('no-NO', { day: '2-digit', month: '2-digit', year: 'numeric' }); // Format: dd.mm.åååå
+            const formattedDate = today.toLocaleDateString('no-NO', { day: '2-digit', month: '2-digit', year: 'numeric' });
             dashboardTitle.textContent = `Oppfølgingsmøte ${formattedDate}`;
 
-            tileContainer.innerHTML = ''; // Tømmer forrige innhold
+            tileContainer.innerHTML = '';
 
             if (selectedCategories.length > 0) {
                 selectedCategories.forEach(category => {
                     const tile = document.createElement('div');
-                    tile.classList.add('tile', 'tile-green'); // Starter som grønn
+                    tile.classList.add('tile', 'tile-green');
                     tile.textContent = category;
-                    tile.addEventListener('click', toggleTileColor); // Legger til klikk-lytter
+                    tile.addEventListener('click', toggleTileColor);
                     tileContainer.appendChild(tile);
                 });
             } else {
-                 // Viser en melding hvis ingen kategorier er valgt
-                 const message = document.createElement('p');
-                 message.textContent = 'Ingen kategorier valgt. Gå tilbake og velg minst én kategori.';
-                 message.classList.add('text-center', 'text-gray-500', 'col-span-9', 'py-10'); // col-span-9 for å fylle grid
-                 tileContainer.appendChild(message);
+                const message = document.createElement('p');
+                message.textContent = 'Ingen kategorier valgt. Gå tilbake og velg minst én kategori.';
+                message.classList.add('text-center', 'text-gray-500', 'col-span-9', 'py-10');
+                tileContainer.appendChild(message);
             }
 
-            // Skjuler menyen og viser dashbordet
             menuView.classList.add('hidden');
             dashboardView.classList.remove('hidden');
-            dashboardView.classList.add('flex'); // Sikrer at flexbox-egenskapene gjelder
+            dashboardView.classList.add('flex');
 
-            // Flytter tilbake-knappen til bunnen av dashbord-visningen
-            dashboardView.appendChild(backButton); // Legger knappen til sist i dashboardView
-            backButton.classList.remove('hidden'); // Viser knappen
-            backButton.classList.remove('w-full', 'mt-4'); // Fjerner meny-spesifikk styling
-            // Legger til klasser for posisjonering nederst til høyre i dashbordet
-            backButton.classList.add('mt-auto', 'self-end', 'mr-4', 'mb-4', 'px-4', 'py-2'); // mt-auto pusher ned, self-end til høyre + margin + padding
+            dashboardView.appendChild(backButton);
+            backButton.classList.remove('hidden');
+            backButton.classList.remove('w-full', 'mt-4');
+            backButton.classList.add('mt-auto', 'self-end', 'mr-4', 'mb-4', 'px-4', 'py-2');
         }
 
-        // Funksjon for å vise menyen igjen
         function showMenu() {
             dashboardView.classList.add('hidden');
-            dashboardView.classList.remove('flex'); // Fjerner flex når den er skjult
+            dashboardView.classList.remove('flex');
             menuView.classList.remove('hidden');
 
-            // Flytter tilbake-knappen tilbake til meny-view og skjuler/styler den
-            // Det er viktig å legge den tilbake på en logisk plass, f.eks. etter submit-knappen
             submitButton.parentNode.insertBefore(backButton, submitButton.nextSibling);
-            backButton.classList.add('hidden'); // Skjuler knappen igjen
-            backButton.classList.add('w-full', 'mt-4'); // Gir tilbake meny-styling
-            // Fjerner dashbord-spesifikk styling
+            backButton.classList.add('hidden');
+            backButton.classList.add('w-full', 'mt-4');
             backButton.classList.remove('mt-auto', 'self-end', 'mr-4', 'mb-4', 'px-4', 'py-2');
         }
 
-
-        // Legger til lytter på "Vis Dashbord"-knappen
         submitButton.addEventListener('click', (event) => {
-            event.preventDefault(); // Forhindrer standard form-innsending hvis den var inne i en <form>
+            event.preventDefault();
             showDashboard();
         });
 
-         // Legger til lytter på "Tilbake til Meny"-knappen
-         backButton.addEventListener('click', showMenu);
-
-         // Legger til lytter på "Velg alle / Fjern alle"-knappen
-         selectAllButton.addEventListener('click', toggleSelectAll);
-
-        // Kjører funksjonen for å lage kategori-listen når siden lastes
-        // Bruker 'DOMContentLoaded' for å sikre at DOM er klar før scriptet kjører
+        backButton.addEventListener('click', showMenu);
+        selectAllButton.addEventListener('click', toggleSelectAll);
         document.addEventListener('DOMContentLoaded', populateCategories);
-
     </script>
-
 </body>
 </html>
