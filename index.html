@@ -128,19 +128,21 @@
 
         /**
          * Bygger og viser kategorivalgene i menyen.
+         * Hele elementet er nå en <label> for å sikre at det er klikkbart overalt.
          */
         function populateCategories() {
             elements.categoryForm.innerHTML = '';
             categories.forEach((category, index) => {
                 const categoryId = `category-${index}`;
+                // FIX: Endret fra <div> til <label> og fjernet indre <label> for å gjøre hele raden klikkbar.
                 const categoryElementHTML = `
-                    <div class="flex items-center justify-between bg-slate-700/50 hover:bg-slate-700 p-3 rounded-lg transition-colors duration-200">
-                        <label for="${categoryId}" class="flex-grow text-sm font-medium text-slate-300 cursor-pointer">${category}</label>
-                        <div class="relative inline-flex items-center cursor-pointer">
+                    <label for="${categoryId}" class="flex items-center justify-between bg-slate-700/50 hover:bg-slate-700 p-3 rounded-lg transition-colors duration-200 cursor-pointer">
+                        <span class="text-sm font-medium text-slate-300">${category}</span>
+                        <div class="relative inline-flex items-center">
                             <input type="checkbox" id="${categoryId}" name="category" value="${category}" class="toggle-checkbox sr-only peer">
                             <div class="w-11 h-6 bg-slate-600 rounded-full peer peer-focus:ring-2 peer-focus:ring-blue-500 peer-checked:bg-blue-600 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border after:rounded-full after:h-5 after:w-5 after:transition-all"></div>
                         </div>
-                    </div>
+                    </label>
                 `;
                 elements.categoryForm.insertAdjacentHTML('beforeend', categoryElementHTML);
             });
