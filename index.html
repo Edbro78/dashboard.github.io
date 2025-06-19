@@ -15,6 +15,14 @@
     
     <style>
         /* Grunnleggende stiler justert til fargepaletten fra bildet. */
+        html, body {
+            height: 100%; /* Sørger for at html og body fyller hele høyden av viewport */
+            width: 100%;  /* Sørger for at html og body fyller hele bredden av viewport */
+            margin: 0;
+            padding: 0;
+            overflow: hidden; /* Forhindrer vertikal og horisontal scrolling på hele siden */
+        }
+
         body {
             font-family: 'Inter', sans-serif;
             background-color: #0f172a; /* Mørkere, dypere blå (slate-900) */
@@ -55,13 +63,20 @@
         .tile-item.is-completed .check-icon {
             opacity: 1; /* Viser sjekk-ikonet. */
         }
+
+        /* NYTT: Stiler for grid i dashbordet for å forhindre scrolling ved zooming */
+        #tile-container {
+            grid-auto-rows: minmax(0, 1fr); /* Sikrer at rader krymper/vokser for å passe, uten å overflyte */
+        }
     </style>
 </head>
 <body class="antialiased">
 
-    <div id="app-container" class="min-h-screen w-full flex flex-col items-center justify-center p-4">
+    <!-- app-container fyller hele skjermen og sentrerer innholdet -->
+    <div id="app-container" class="h-screen w-screen flex flex-col items-center justify-center p-4">
 
         <!-- MENY-VISNING: Her velger brukeren kategorier -->
+        <!-- Justert til å fylle full bredde, med en max-bredde og sentrert for best utnyttelse av plassen -->
         <div id="menu-view" class="w-full max-w-2xl mx-auto transition-opacity duration-500">
             <div class="bg-[#1e293b] border border-[#334152] rounded-2xl shadow-2xl shadow-black/30 p-8">
                 <div class="text-center mb-8">
@@ -78,6 +93,7 @@
                     </button>
                 </div>
                 
+                <!-- Max høyde satt for å tillate scrolling kun innenfor dette feltet -->
                 <form id="category-form" class="space-y-3 max-h-[50vh] overflow-y-auto pr-4 custom-scrollbar">
                     <!-- Kategorier blir dynamisk lagt til her av JavaScript -->
                 </form>
@@ -85,11 +101,14 @@
         </div>
 
         <!-- DASHBOARD-VISNING: Viser de valgte kategoriene som kort -->
+        <!-- Justert til å fylle hele tilgjengelige høyden og bredden -->
         <div id="dashboard-view" class="hidden w-full h-full max-w-7xl mx-auto transition-opacity duration-500">
              <div class="bg-[#1e293b]/80 backdrop-blur-sm border border-[#334152] rounded-2xl p-6 h-full flex flex-col">
                  <h1 id="dashboard-title" class="text-3xl font-bold text-slate-100 mb-8">Oppfølgingsmøte</h1>
                  
-                 <div id="tile-container" class="grid grid-cols-1 lg:grid-cols-2 gap-6 flex-grow overflow-y-auto custom-scrollbar pr-2">
+                 <!-- Bruker flex-grow for at containeren skal fylle tilgjengelig plass vertikalt -->
+                 <!-- FJERNET: overflow-y-auto custom-scrollbar for å hindre scrolling her -->
+                 <div id="tile-container" class="grid grid-cols-1 lg:grid-cols-2 gap-6 flex-grow pr-2">
                     <!-- Fliser/kort for hver kategori blir lagt til her -->
                 </div>
 
@@ -105,11 +124,20 @@
     <script>
         // Data: Liste over tilgjengelige kategorier for møtet
         const categories = [
-            'Planlegge innløsninger', 'Skatt, inntekt', 'Skatt, formue', 'Skatt, utbytte',
-            'Skatt, inntekt, formue, utbytte', 'Langsiktig likviditetsstyring', 'Likviditetsfond',
-            'Oppdatert formuesplan', 'Fremtidsfullmakt', 'Testament', 'Ektepakt',
-            'Andre juridiske dokumenter', 'Pensjon', 'Regnskap', 'Henvisningsmodell',
-            'Indeks vs aktiv', 'Eksterne investeringer, oversikt', 'Sparing', 'Mobil App', 'Forsikring'
+            'Skatt',
+            'Langsiktig likviditetsstyring',
+            'Oppdatert formuesplan',
+            'Fremtidsfullmakt',
+            'Testament',
+            'Ektepakt',
+            'Andre juridiske dokumenter',
+            'Pensjon',
+            'Regnskap',
+            'Henvisningsmodell',
+            'Eksterne investeringer, oversikt',
+            'Sparing',
+            'Mobil App',
+            'Forsikring'
         ];
 
         // Henter inn alle nødvendige DOM-elementer én gang for bedre ytelse
