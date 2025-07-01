@@ -52,16 +52,28 @@
             background: #64748b; /* Lysere gråblå (slate-500) */
         }
         
-        /* Stiler for kort som er markert som fullført. */
-        .tile-item.is-completed {
+        /* Stiler for kort som er i 'grønn' tilstand (fullført). */
+        .tile-item.state-green {
             background-color: #15803d; /* En behagelig, dyp grønnfarge (green-700) */
             border-color: #22c55e; /* En klarere grønn kantfarge (green-500) */
         }
-        .tile-item.is-completed .tile-text {
+        .tile-item.state-green .tile-text {
             color: #ffffff; /* Hvit tekst for god kontrast på den grønne bakgrunnen. */
         }
-        .tile-item.is-completed .check-icon {
+        .tile-item.state-green .check-icon {
             opacity: 1; /* Viser sjekk-ikonet. */
+        }
+
+        /* NYTT: Stiler for kort som er i 'rød' tilstand (ikke fullført / krever oppfølging). */
+        .tile-item.state-red {
+            background-color: #b91c1c; /* En behagelig, dyp rød farge (red-700) */
+            border-color: #ef4444; /* En klarere rød kantfarge (red-500) */
+        }
+        .tile-item.state-red .tile-text {
+            color: #ffffff; /* Hvit tekst for god kontrast på den røde bakgrunnen. */
+        }
+        .tile-item.state-red .check-icon {
+            opacity: 0; /* Skjuler sjekk-ikonet i rød tilstand. */
         }
 
         /* NYTT: Stiler for grid i dashbordet for å forhindre scrolling ved zooming */
@@ -109,15 +121,15 @@
                  <!-- Bruker flex-grow for at containeren skal fylle tilgjengelig plass vertikalt -->
                  <!-- FJERNET: overflow-y-auto custom-scrollbar for å hindre scrolling her -->
                  <div id="tile-container" class="grid grid-cols-1 lg:grid-cols-2 gap-6 flex-grow pr-2">
-                    <!-- Fliser/kort for hver kategori blir lagt til her -->
-                </div>
+                     <!-- Fliser/kort for hver kategori blir lagt til her -->
+                 </div>
 
-                <div class="pt-6 mt-auto flex justify-end">
+                 <div class="pt-6 mt-auto flex justify-end">
                      <button id="back-button" class="bg-slate-700 hover:bg-slate-600 text-slate-100 font-semibold py-3 px-6 rounded-lg transition duration-300 ease-in-out transform hover:scale-105">
-                        Tilbake til Meny
-                    </button>
-                </div>
-            </div>
+                         Tilbake til Meny
+                     </button>
+                 </div>
+             </div>
         </div>
     </div>
 
@@ -186,11 +198,29 @@
         }
         
         /**
-         * Veksler status for et oppfølgingspunkt (kort) ved å legge til/fjerne 'is-completed'-klassen.
+         * Veksler status for et oppfølgingspunkt (kort) ved å endre farge basert på klikk.
+         * Syklus: Blå (standard) -> Grønn -> Rød -> Blå...
          * @param {Event} event - Klikk-hendelsen fra kortet.
          */
         function toggleTileStatus(event) {
-            event.currentTarget.classList.toggle('is-completed');
+            const tile = event.currentTarget;
+            // Henter gjeldende tilstand, konverterer til tall, eller 0 hvis ikke satt
+            let currentState = parseInt(tile.dataset.state || '0'); 
+            
+            // Beregner neste tilstand (0=blå, 1=grønn, 2=rød)
+            const nextState = (currentState + 1) % 3; 
+            tile.dataset.state = nextState; // Lagrer den nye tilstanden
+
+            // Fjerner alle tilstandsrelaterte klasser først
+            tile.classList.remove('state-green', 'state-red');
+
+            // Legger til den nye tilstandsklassen og justerer ikonets synlighet
+            if (nextState === 1) { // Grønn tilstand
+                tile.classList.add('state-green');
+            } else if (nextState === 2) { // Rød tilstand
+                tile.classList.add('state-red');
+            }
+            // Hvis nextState er 0, er ingen spesifikk klasse lagt til, og den går tilbake til standard blå stil.
         }
         
         /**
@@ -208,7 +238,10 @@
             if (selectedCategories.length > 0) {
                 selectedCategories.forEach(category => {
                     const tile = document.createElement('div');
-                    tile.className = 'tile-item flex items-center justify-between bg-slate-800/80 border border-slate-700 rounded-lg p-6 cursor-pointer transition-all duration-300 hover:border-blue-500 hover:bg-slate-700/50 transform hover:-translate-y-1';
+                    // Initialiserer data-state til 0 (blå)
+                    tile.dataset.state = '0'; 
+                    // Endret transition-all duration-300 til duration-100 for raskere fargeskifte
+                    tile.className = 'tile-item flex items-center justify-between bg-slate-800/80 border border-slate-700 rounded-lg p-6 cursor-pointer transition-all duration-100 hover:border-blue-500 hover:bg-slate-700/50 transform hover:-translate-y-1';
                     
                     tile.innerHTML = `
                         <span class="tile-text font-semibold text-slate-300 transition-colors">${category}</span>
